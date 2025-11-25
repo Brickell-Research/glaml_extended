@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import yaml from "js-yaml";
 import { Ok, Error as GleamError, toList } from "../gleam_stdlib/gleam.mjs";
-import * as glaml from "./glaml.mjs";
+import * as glaml from "./glaml_extended.mjs";
 
 // Parse YAML file and return list of documents
 export function parse_file(path) {
