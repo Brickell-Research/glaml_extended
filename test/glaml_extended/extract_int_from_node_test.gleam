@@ -36,3 +36,9 @@ pub fn extract_int_from_node_zero_test() {
   glaml_extended.extract_int_from_node(root, "count")
   |> should.equal(Ok(0))
 }
+
+pub fn extract_int_from_node_empty_test() {
+  let root = yaml_to_root("count: ")
+  glaml_extended.extract_int_from_node(root, "count")
+  |> should.equal(Error("Expected count to be non-empty"))
+}

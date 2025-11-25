@@ -37,3 +37,9 @@ pub fn extract_float_from_node_wrong_type_test() {
   glaml_extended.extract_float_from_node(root, "threshold")
   |> should.equal(Error("Expected threshold to be a float"))
 }
+
+pub fn extract_float_from_node_empty_test() {
+  let root = yaml_to_root("threshold: ")
+  glaml_extended.extract_float_from_node(root, "threshold")
+  |> should.equal(Error("Expected threshold to be non-empty"))
+}

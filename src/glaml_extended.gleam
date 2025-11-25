@@ -213,6 +213,7 @@ pub fn extract_string_from_node(
   })
   case query_template_node {
     NodeStr(value) -> Ok(value)
+    NodeNil -> Error("Expected " <> key <> " to be non-empty")
     _ -> Error("Expected " <> key <> " to be a string")
   }
 }
@@ -228,6 +229,7 @@ pub fn extract_float_from_node(node: Node, key: String) -> Result(Float, String)
   case query_template_node {
     NodeFloat(value) -> Ok(value)
     NodeInt(value) -> Ok(int.to_float(value))
+    NodeNil -> Error("Expected " <> key <> " to be non-empty")
     _ -> Error("Expected " <> key <> " to be a float")
   }
 }
@@ -240,6 +242,7 @@ pub fn extract_int_from_node(node: Node, key: String) -> Result(Int, String) {
   })
   case query_template_node {
     NodeInt(value) -> Ok(value)
+    NodeNil -> Error("Expected " <> key <> " to be non-empty")
     _ -> Error("Expected " <> key <> " to be an integer")
   }
 }
@@ -252,11 +255,14 @@ pub fn extract_bool_from_node(node: Node, key: String) -> Result(Bool, String) {
   })
   case query_template_node {
     NodeBool(value) -> Ok(value)
+    NodeNil -> Error("Expected " <> key <> " to be non-empty")
     _ -> Error("Expected " <> key <> " to be a boolean")
   }
 }
 
 /// Extracts a list of strings from a glaml node.
+/// Returns Ok([]) if the key exists but has an empty/nil value.
+/// Returns Error if the key is missing or has wrong type.
 pub fn extract_string_list_from_node(
   node: Node,
   key: String,
@@ -265,21 +271,26 @@ pub fn extract_string_list_from_node(
     Ok(node) -> Ok(node)
     Error(_) -> Error("Missing " <> key)
   })
-  // Try to access the first element to validate it's a list structure
-  case select_sugar(list_node, "#0") {
-    Ok(_) -> do_extract_string_list(list_node, 0)
-    Error(_) -> {
-      // Check if it's a non-list node that would cause the wrong error
-      case list_node {
-        NodeStr(_) -> Error("Expected " <> key <> " list item to be a string")
-        _ -> Error("Expected " <> key <> " to be a list")
+  case list_node {
+    // Empty/nil value - return empty list
+    NodeNil -> Ok([])
+    // Sequence - extract strings from it
+    NodeSeq(_) -> {
+      case select_sugar(list_node, "#0") {
+        Ok(_) -> do_extract_string_list(list_node, 0)
+        // Empty sequence
+        Error(_) -> Ok([])
       }
     }
+    // Wrong type - not a list
+    NodeStr(_) -> Error("Expected " <> key <> " list item to be a string")
+    _ -> Error("Expected " <> key <> " to be a list")
   }
 }
 
 /// Extracts a dictionary of string key-value pairs from a glaml node.
-/// Returns an empty dict if the key is missing (allowing optional empty dicts).
+/// Returns Ok(empty dict) if the key exists but has an empty/nil value.
+/// Returns Error if the key is missing or has wrong type.
 pub fn extract_dict_strings_from_node(
   node: Node,
   key: String,
@@ -287,6 +298,9 @@ pub fn extract_dict_strings_from_node(
   case select_sugar(node, key) {
     Ok(dict_node) -> {
       case dict_node {
+        // Empty/nil value - return empty dict
+        NodeNil -> Ok(dict.new())
+        // Map - extract string key-value pairs
         NodeMap(entries) -> {
           entries
           |> list.try_map(fn(entry) {
@@ -300,13 +314,12 @@ pub fn extract_dict_strings_from_node(
           })
           |> result.map(dict.from_list)
         }
+        // Wrong type - not a map
         _ -> Error("Expected " <> key <> " to be a map")
       }
     }
-    Error(_) -> {
-      // If the key is missing, return an empty dict (allows optional empty instantiation)
-      Ok(dict.new())
-    }
+    // Key doesn't exist
+    Error(_) -> Error("Missing " <> key)
   }
 }
 

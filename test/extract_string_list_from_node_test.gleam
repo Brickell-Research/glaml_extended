@@ -36,3 +36,9 @@ pub fn extract_string_list_from_node_not_a_list_test() {
   glaml_extended.extract_string_list_from_node(root, "items")
   |> should.equal(Error("Expected items list item to be a string"))
 }
+
+pub fn extract_string_list_from_node_empty_test() {
+  let root = yaml_to_root("items: ")
+  glaml_extended.extract_string_list_from_node(root, "items")
+  |> should.equal(Ok([]))
+}

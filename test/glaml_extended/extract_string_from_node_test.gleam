@@ -30,3 +30,15 @@ pub fn extract_string_from_node_nested_test() {
   glaml_extended.extract_string_from_node(root, "outer.inner")
   |> should.equal(Ok("nested_value"))
 }
+
+pub fn extract_string_from_node_empty_test() {
+  let root = yaml_to_root("outer: ")
+  glaml_extended.extract_string_from_node(root, "outer")
+  |> should.equal(Error("Expected outer to be non-empty"))
+}
+
+pub fn extract_string_from_node_nested_empty_test() {
+  let root = yaml_to_root("outer:\n  inner: ")
+  glaml_extended.extract_string_from_node(root, "outer.inner")
+  |> should.equal(Error("Expected outer.inner to be non-empty"))
+}

@@ -21,13 +21,19 @@ pub fn extract_dict_strings_from_node_success_test() {
 pub fn extract_dict_strings_from_node_missing_returns_empty_dict_test() {
   let root = yaml_to_root("other: value")
   glaml_extended.extract_dict_strings_from_node(root, "labels")
-  |> should.equal(Ok(dict.new()))
+  |> should.equal(Error("Missing labels"))
 }
 
 pub fn extract_dict_strings_from_node_not_a_map_test() {
   let root = yaml_to_root("labels: not_a_map")
   glaml_extended.extract_dict_strings_from_node(root, "labels")
   |> should.equal(Error("Expected labels to be a map"))
+}
+
+pub fn extract_dict_strings_from_node_empty_test() {
+  let root = yaml_to_root("labels: ")
+  glaml_extended.extract_dict_strings_from_node(root, "labels")
+  |> should.equal(Ok(dict.new()))
 }
 
 pub fn extract_dict_strings_from_node_non_string_value_test() {

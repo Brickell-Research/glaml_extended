@@ -30,3 +30,9 @@ pub fn extract_bool_from_node_wrong_type_test() {
   glaml_extended.extract_bool_from_node(root, "enabled")
   |> should.equal(Error("Expected enabled to be a boolean"))
 }
+
+pub fn extract_bool_from_node_empty_test() {
+  let root = yaml_to_root("enabled: ")
+  glaml_extended.extract_bool_from_node(root, "enabled")
+  |> should.equal(Error("Expected enabled to be non-empty"))
+}
