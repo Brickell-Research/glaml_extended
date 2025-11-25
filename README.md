@@ -2,7 +2,7 @@
 
 A fork of [glaml](https://github.com/katekyy/glaml) which is a simple Gleam wrapper around [yamerl](https://hex.pm/packages/yamerl) that enables your app to read YAML.
 
-This is not (yet?) merged upstream nor published to hex as we add the following (which are somewhat opinionated):
-* preserve duplicate keys
-* add Javascript ffi bindings with ci that tests both Erlang and Javascript versions
-* **WIP** - add extractors to coalesce values into an expected type
+## Changelog (deviation from glaml)
+
+* **3.0.4** (11/25/25): Include extraction helper methods to coalesce specific values to typed version.
+* **3.0.3** (11/25/25): JS bindings and surface duplicate keys.
