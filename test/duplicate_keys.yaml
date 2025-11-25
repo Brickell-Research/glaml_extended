@@ -1,0 +1,7 @@
+doc: 1
+doc: 2
+---
+doc:
+  inputs:
+    foo: 1
+    foo: 2

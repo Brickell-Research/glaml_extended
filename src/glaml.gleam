@@ -42,11 +42,13 @@ pub type Node {
 /// Parse a YAML file located in `path` into a list of YAML documents.
 ///
 @external(erlang, "yaml_ffi", "parse_file")
+@external(javascript, "./yaml_ffi.mjs", "parse_file")
 pub fn parse_file(path: String) -> Result(List(Document), YamlError)
 
 /// Parse a string into a list of YAML documents.
 ///
 @external(erlang, "yaml_ffi", "parse_string")
+@external(javascript, "./yaml_ffi.mjs", "parse_string")
 pub fn parse_string(string: String) -> Result(List(Document), YamlError)
 
 /// Gets the root `Node` of a YAML document.

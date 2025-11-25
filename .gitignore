@@ -5,3 +5,7 @@ erl_crash.dump
 manifest.toml
 
 /src/*/include
+
+# Node.js (JavaScript target)
+node_modules/
+package-lock.json

@@ -87,3 +87,32 @@ pub fn error_test() {
   glaml.parse_selector("#invalid index")
   |> should.equal(Error(glaml.SelectorParseError))
 }
+
+pub fn duplicate_key_test() {
+  let assert Ok(docs) = glaml.parse_file("./test/duplicate_keys.yaml")
+
+  should.equal(docs, [
+    glaml.Document(
+      glaml.NodeMap([
+        #(glaml.NodeStr("doc"), glaml.NodeInt(1)),
+        #(glaml.NodeStr("doc"), glaml.NodeInt(2)),
+      ]),
+    ),
+    glaml.Document(
+      glaml.NodeMap([
+        #(
+          glaml.NodeStr("doc"),
+          glaml.NodeMap([
+            #(
+              glaml.NodeStr("inputs"),
+              glaml.NodeMap([
+                #(glaml.NodeStr("foo"), glaml.NodeInt(1)),
+                #(glaml.NodeStr("foo"), glaml.NodeInt(2)),
+              ]),
+            ),
+          ]),
+        ),
+      ]),
+    ),
+  ])
+}

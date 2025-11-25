@@ -22,7 +22,7 @@
 -spec parse_file(Path :: iolist() | binary()) -> {ok, list(document())} | {error, yaml_error()}.
 parse_file(Path) ->
     try
-        Docs = map_yamerl_docs(yamerl_constr:file(Path, [{detailed_constr, true}])),
+        Docs = map_yamerl_docs(yamerl_constr:file(Path, [{detailed_constr, true}, {keep_duplicate_keys, true}])),
         {ok, Docs}
     catch
         throw:#yamerl_exception{errors = [First | _]} ->
@@ -35,7 +35,7 @@ parse_file(Path) ->
 -spec parse_string(String :: iolist() | binary()) -> {ok, list(document())} | {error, yaml_error()}.
 parse_string(String) ->
     try
-        Docs = map_yamerl_docs(yamerl_constr:string(String, [{detailed_constr, true}])),
+        Docs = map_yamerl_docs(yamerl_constr:string(String, [{detailed_constr, true}, {keep_duplicate_keys, true}])),
         {ok, Docs}
     catch
         throw:#yamerl_exception{errors = [First | _]} ->

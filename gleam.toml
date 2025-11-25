@@ -1,15 +1,12 @@
-name = "glaml"
-version = "3.0.2"
+name = "glaml_extended"
+version = "3.0.3"
 
 licences = ["MIT"]
 
-description = "A Gleam wrapper around yamerl that enables your app to read YAML."
+description = "A Gleam YAML parser supporting both Erlang and JavaScript targets based on a fork of glaml."
 
-repository = { type = "github", user = "katekyy", repo = "glaml" }
-links = [
-    { title = "Website", href = "https://github.com/katekyy/glaml" },
-    { title = "yamerl", href = "https://hex.pm/packages/yamerl" },
-]
+repository = { type = "github", user = "Brickell-Research", repo = "glaml_extended" }
+links = []
 
 target = "erlang"
 

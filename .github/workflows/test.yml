@@ -8,17 +8,34 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: [erlang, javascript]
+    name: Test on ${{ matrix.target }}
     steps:
       - uses: actions/checkout@v4
+      
       - uses: erlef/setup-beam@v1
         with:
           otp-version: "latest"
           gleam-version: "latest"
           rebar3-version: "latest"
+      
+      - uses: actions/setup-node@v4
+        if: matrix.target == 'javascript'
+        with:
+          node-version: "20"
+      
       - name: Prepare
-        # we don't need to run ./develop.sh
-        run: gleam deps download
-      - name: Test
-        run: gleam test
+        run: |
+          gleam deps download
+          if [ "${{ matrix.target }}" = "javascript" ]; then
+            npm install
+          fi
+      
+      - name: Test on ${{ matrix.target }}
+        run: gleam test --target ${{ matrix.target }}
+      
       - name: Check formatting
+        if: matrix.target == 'erlang'  # Only check formatting once
         run: gleam format --check src test
