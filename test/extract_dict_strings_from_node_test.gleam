@@ -11,7 +11,11 @@ fn yaml_to_root(yaml_str: String) -> glaml_extended.Node {
 pub fn extract_dict_strings_from_node_success_test() {
   let root = yaml_to_root("labels:\n  env: production\n  team: platform")
   let assert Ok(result) =
-    glaml_extended.extract_dict_strings_from_node(root, "labels")
+    glaml_extended.extract_dict_strings_from_node(
+      root,
+      "labels",
+      fail_on_key_duplication: False,
+    )
   dict.get(result, "env")
   |> should.equal(Ok("production"))
   dict.get(result, "team")
@@ -20,34 +24,74 @@ pub fn extract_dict_strings_from_node_success_test() {
 
 pub fn extract_dict_strings_from_node_missing_returns_empty_dict_test() {
   let root = yaml_to_root("other: value")
-  glaml_extended.extract_dict_strings_from_node(root, "labels")
+  glaml_extended.extract_dict_strings_from_node(
+    root,
+    "labels",
+    fail_on_key_duplication: False,
+  )
   |> should.equal(Error("Missing labels"))
 }
 
 pub fn extract_dict_strings_from_node_not_a_map_test() {
   let root = yaml_to_root("labels: not_a_map")
-  glaml_extended.extract_dict_strings_from_node(root, "labels")
+  glaml_extended.extract_dict_strings_from_node(
+    root,
+    "labels",
+    fail_on_key_duplication: False,
+  )
   |> should.equal(Error("Expected labels to be a map"))
 }
 
 pub fn extract_dict_strings_from_node_empty_test() {
   let root = yaml_to_root("labels: ")
-  glaml_extended.extract_dict_strings_from_node(root, "labels")
+  glaml_extended.extract_dict_strings_from_node(
+    root,
+    "labels",
+    fail_on_key_duplication: False,
+  )
   |> should.equal(Ok(dict.new()))
 }
 
 pub fn extract_dict_strings_from_node_non_string_value_test() {
   let root = yaml_to_root("labels:\n  count: 123")
-  glaml_extended.extract_dict_strings_from_node(root, "labels")
+  glaml_extended.extract_dict_strings_from_node(
+    root,
+    "labels",
+    fail_on_key_duplication: False,
+  )
   |> should.equal(Error("Expected labels entries to be string key-value pairs"))
 }
 
 pub fn extract_dict_strings_from_node_single_entry_test() {
   let root = yaml_to_root("labels:\n  key: value")
   let assert Ok(result) =
-    glaml_extended.extract_dict_strings_from_node(root, "labels")
+    glaml_extended.extract_dict_strings_from_node(
+      root,
+      "labels",
+      fail_on_key_duplication: False,
+    )
   dict.size(result)
   |> should.equal(1)
   dict.get(result, "key")
   |> should.equal(Ok("value"))
+}
+
+pub fn extract_dict_strings_from_node_duplicate_key_fail_on_duplication_test() {
+  let root = yaml_to_root("labels:\n  key: value\n  key: other_value")
+  glaml_extended.extract_dict_strings_from_node(
+    root,
+    "labels",
+    fail_on_key_duplication: True,
+  )
+  |> should.equal(Error("Duplicate keys detected for labels: key"))
+}
+
+pub fn extract_dict_strings_from_node_duplicate_key_do_not_fail_on_duplication_test() {
+  let root = yaml_to_root("labels:\n  key: value\n  key: other_value")
+  glaml_extended.extract_dict_strings_from_node(
+    root,
+    "labels",
+    fail_on_key_duplication: False,
+  )
+  |> should.equal(Ok(dict.from_list([#("key", "other_value")])))
 }

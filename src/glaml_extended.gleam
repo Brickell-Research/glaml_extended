@@ -3,6 +3,7 @@ import gleam/int
 import gleam/list
 import gleam/option
 import gleam/result
+import gleam/set
 import gleam/string
 
 /// A YAML document error containing a message — `msg` and it's location — `loc`.
@@ -288,12 +289,43 @@ pub fn extract_string_list_from_node(
   }
 }
 
+fn validate_no_duplicate_keys(
+  items_result: Result(List(#(String, String)), String),
+  key: String,
+  fail_on_key_duplication: Bool,
+) -> Result(List(#(String, String)), String) {
+  use items <- result.try(items_result)
+
+  let #(_seen, duplicates) =
+    list.fold(items, #(set.new(), set.new()), fn(acc, item) {
+      let #(seen, duplicates) = acc
+      case set.contains(seen, item.0) {
+        True -> #(seen, set.insert(duplicates, item.0))
+        False -> #(set.insert(seen, item.0), duplicates)
+      }
+    })
+
+  let dupes_list = set.to_list(duplicates)
+  case dupes_list, fail_on_key_duplication {
+    [], _ -> Ok(items)
+    _, False -> Ok(items)
+    _, True ->
+      Error(
+        "Duplicate keys detected for "
+        <> key
+        <> ": "
+        <> string.join(dupes_list, ", "),
+      )
+  }
+}
+
 /// Extracts a dictionary of string key-value pairs from a glaml node.
 /// Returns Ok(empty dict) if the key exists but has an empty/nil value.
 /// Returns Error if the key is missing or has wrong type.
 pub fn extract_dict_strings_from_node(
   node: Node,
   key: String,
+  fail_on_key_duplication fail_on_key_duplication: Bool,
 ) -> Result(dict.Dict(String, String), String) {
   case select_sugar(node, key) {
     Ok(dict_node) -> {
@@ -312,6 +344,7 @@ pub fn extract_dict_strings_from_node(
                 )
             }
           })
+          |> validate_no_duplicate_keys(key, fail_on_key_duplication)
           |> result.map(dict.from_list)
         }
         // Wrong type - not a map
