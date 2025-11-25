@@ -4,6 +4,7 @@ A fork of [glaml](https://github.com/katekyy/glaml) which is a simple Gleam wrap
 
 ## Changelog (deviation from glaml)
 
+* **3.0.7** (11/25/25): When no elements during terative collection parsing, surface "is empty" error.
 * **3.0.6** (11/25/25): Dictionary extraction will now fail on key duplication if (`fail_on_duplication: true`) passed in.
 * **3.0.5** (11/25/25): Extractors now differentiate between missing keys, empty values, and wrong types.
 * **3.0.4** (11/25/25): Include extraction helper methods to coalesce specific values to typed version.

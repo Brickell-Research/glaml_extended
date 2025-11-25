@@ -367,7 +367,7 @@ pub fn iteratively_parse_collection(
     select_sugar(root, key)
     |> result.map_error(fn(_) { "Missing " <> key }),
   )
-  do_parse_collection(services_node, 0, params, actual_parse_fn)
+  do_parse_collection(services_node, 0, params, actual_parse_fn, key)
 }
 
 /// Internal parser for list of nodes, iterates over the list.
@@ -376,6 +376,7 @@ fn do_parse_collection(
   index: Int,
   params: dict.Dict(String, String),
   actual_parse_fn: fn(Node, dict.Dict(String, String)) -> Result(a, String),
+  key: String,
 ) -> Result(List(a), String) {
   case select_sugar(services, "#" <> int.to_string(index)) {
     Ok(service_node) -> {
@@ -385,11 +386,19 @@ fn do_parse_collection(
         index + 1,
         params,
         actual_parse_fn,
+        key,
       ))
       Ok([service, ..rest])
     }
+    Error(error) -> {
+      case error, index {
+        NodeNotFound(_), 0 -> Error(key <> " is empty")
+        NodeNotFound(_), _ -> Ok([])
+        SelectorParseError, _ -> Error(key <> " is unparsable")
+      }
+    }
     // TODO: fix this super hacky way of iterating over SLOs.
-    Error(_) -> Ok([])
+    // Error(_) -> Ok([])
   }
 }
 

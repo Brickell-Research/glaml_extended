@@ -36,20 +36,6 @@ pub fn iteratively_parse_collection_missing_key_test() {
   |> should.equal(Error("Missing missing"))
 }
 
-pub fn iteratively_parse_collection_empty_list_test() {
-  let root = yaml_to_root("services: []")
-  let parse_service = fn(node, _params) {
-    glaml_extended.extract_string_from_node(node, "name")
-  }
-  glaml_extended.iteratively_parse_collection(
-    root,
-    dict.new(),
-    parse_service,
-    "services",
-  )
-  |> should.equal(Ok([]))
-}
-
 pub fn iteratively_parse_collection_single_item_test() {
   let root = yaml_to_root("services:\n  - name: only_service")
   let parse_service = fn(node, _params) {
@@ -93,4 +79,21 @@ pub fn iteratively_parse_collection_with_params_test() {
     "services",
   )
   |> should.equal(Ok(["svc_service1", "svc_service2"]))
+}
+
+pub fn iteratively_parse_collection_with_no_content_test() {
+  let root = yaml_to_root("services:")
+  let params = dict.new()
+  let parse_service = fn(node, p) {
+    let assert Ok(name) = glaml_extended.extract_string_from_node(node, "name")
+    let assert Ok(prefix) = dict.get(p, "prefix")
+    Ok(prefix <> name)
+  }
+  glaml_extended.iteratively_parse_collection(
+    root,
+    params,
+    parse_service,
+    "services",
+  )
+  |> should.equal(Error("services is empty"))
 }
