@@ -24,11 +24,13 @@ pub fn extract_string_from_node_missing_key_test() {
 pub fn extract_string_from_node_wrong_type_test() {
   let root = yaml_to_root("name: 123")
   glaml_extended.extract_string_from_node(root, "name")
-  |> should.equal(Error(LabelTypeMismatch(
-    label: "name",
-    expected: ExpectedString,
-    found: "int",
-  )))
+  |> should.equal(
+    Error(LabelTypeMismatch(
+      label: "name",
+      expected: ExpectedString,
+      found: "int",
+    )),
+  )
 }
 
 pub fn extract_string_from_node_nested_test() {
