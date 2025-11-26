@@ -4,6 +4,9 @@ A fork of [glaml](https://github.com/katekyy/glaml) which is a simple Gleam wrap
 
 ## Changelog (deviation from glaml)
 
+* **3.0.8** (11/25/25):
+  * Minimal watch tests script
+  * Replace string errors with typed errors for pattern-matchable, type-safe error handling with expected vs. found type info.
 * **3.0.7** (11/25/25): When no elements during terative collection parsing, surface "is empty" error.
 * **3.0.6** (11/25/25): Dictionary extraction will now fail on key duplication if (`fail_on_duplication: true`) passed in.
 * **3.0.5** (11/25/25): Extractors now differentiate between missing keys, empty values, and wrong types.

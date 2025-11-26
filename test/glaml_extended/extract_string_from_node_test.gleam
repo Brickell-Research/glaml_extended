@@ -1,4 +1,6 @@
-import glaml_extended
+import glaml_extended.{
+  ExpectedString, LabelMissing, LabelTypeMismatch, LabelValueEmpty,
+}
 import gleeunit/should
 
 // Helper function to parse YAML string to root node
@@ -16,13 +18,17 @@ pub fn extract_string_from_node_success_test() {
 pub fn extract_string_from_node_missing_key_test() {
   let root = yaml_to_root("name: test_value")
   glaml_extended.extract_string_from_node(root, "missing")
-  |> should.equal(Error("Missing missing"))
+  |> should.equal(Error(LabelMissing(label: "missing")))
 }
 
 pub fn extract_string_from_node_wrong_type_test() {
   let root = yaml_to_root("name: 123")
   glaml_extended.extract_string_from_node(root, "name")
-  |> should.equal(Error("Expected name to be a string"))
+  |> should.equal(Error(LabelTypeMismatch(
+    label: "name",
+    expected: ExpectedString,
+    found: "int",
+  )))
 }
 
 pub fn extract_string_from_node_nested_test() {
@@ -34,11 +40,11 @@ pub fn extract_string_from_node_nested_test() {
 pub fn extract_string_from_node_empty_test() {
   let root = yaml_to_root("outer: ")
   glaml_extended.extract_string_from_node(root, "outer")
-  |> should.equal(Error("Expected outer to be non-empty"))
+  |> should.equal(Error(LabelValueEmpty(label: "outer")))
 }
 
 pub fn extract_string_from_node_nested_empty_test() {
   let root = yaml_to_root("outer:\n  inner: ")
   glaml_extended.extract_string_from_node(root, "outer.inner")
-  |> should.equal(Error("Expected outer.inner to be non-empty"))
+  |> should.equal(Error(LabelValueEmpty(label: "outer.inner")))
 }

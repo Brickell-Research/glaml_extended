@@ -1,4 +1,4 @@
-import glaml_extended
+import glaml_extended.{LabelMissing, LabelValueEmpty}
 import gleam/dict
 import gleeunit/should
 
@@ -33,7 +33,7 @@ pub fn iteratively_parse_collection_missing_key_test() {
     parse_service,
     "missing",
   )
-  |> should.equal(Error("Missing missing"))
+  |> should.equal(Error(LabelMissing(label: "missing")))
 }
 
 pub fn iteratively_parse_collection_single_item_test() {
@@ -61,7 +61,7 @@ pub fn iteratively_parse_collection_parse_error_test() {
     parse_service,
     "services",
   )
-  |> should.equal(Error("Missing name"))
+  |> should.equal(Error(LabelMissing(label: "name")))
 }
 
 pub fn iteratively_parse_collection_with_params_test() {
@@ -95,5 +95,5 @@ pub fn iteratively_parse_collection_with_no_content_test() {
     parse_service,
     "services",
   )
-  |> should.equal(Error("services is empty"))
+  |> should.equal(Error(LabelValueEmpty(label: "services")))
 }

@@ -1,4 +1,6 @@
-import glaml_extended
+import glaml_extended.{
+  ExpectedFloat, LabelMissing, LabelTypeMismatch, LabelValueEmpty,
+}
 import gleeunit/should
 
 // Helper function to parse YAML string to root node
@@ -16,7 +18,7 @@ pub fn extract_float_from_node_success_test() {
 pub fn extract_float_from_node_missing_key_test() {
   let root = yaml_to_root("threshold: 99.9")
   glaml_extended.extract_float_from_node(root, "missing")
-  |> should.equal(Error("Missing missing"))
+  |> should.equal(Error(LabelMissing(label: "missing")))
 }
 
 pub fn extract_float_from_node_from_int_test() {
@@ -35,11 +37,15 @@ pub fn extract_float_from_node_negative_test() {
 pub fn extract_float_from_node_wrong_type_test() {
   let root = yaml_to_root("threshold: not_a_number")
   glaml_extended.extract_float_from_node(root, "threshold")
-  |> should.equal(Error("Expected threshold to be a float"))
+  |> should.equal(Error(LabelTypeMismatch(
+    label: "threshold",
+    expected: ExpectedFloat,
+    found: "string",
+  )))
 }
 
 pub fn extract_float_from_node_empty_test() {
   let root = yaml_to_root("threshold: ")
   glaml_extended.extract_float_from_node(root, "threshold")
-  |> should.equal(Error("Expected threshold to be non-empty"))
+  |> should.equal(Error(LabelValueEmpty(label: "threshold")))
 }

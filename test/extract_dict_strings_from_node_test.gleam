@@ -1,4 +1,7 @@
-import glaml_extended
+import glaml_extended.{
+  DuplicateKeysDetected, ExpectedMap, ExpectedStringMap, LabelMissing,
+  LabelTypeMismatch,
+}
 import gleam/dict
 import gleeunit/should
 
@@ -29,7 +32,7 @@ pub fn extract_dict_strings_from_node_missing_returns_empty_dict_test() {
     "labels",
     fail_on_key_duplication: False,
   )
-  |> should.equal(Error("Missing labels"))
+  |> should.equal(Error(LabelMissing(label: "labels")))
 }
 
 pub fn extract_dict_strings_from_node_not_a_map_test() {
@@ -39,7 +42,11 @@ pub fn extract_dict_strings_from_node_not_a_map_test() {
     "labels",
     fail_on_key_duplication: False,
   )
-  |> should.equal(Error("Expected labels to be a map"))
+  |> should.equal(Error(LabelTypeMismatch(
+    label: "labels",
+    expected: ExpectedMap,
+    found: "string",
+  )))
 }
 
 pub fn extract_dict_strings_from_node_empty_test() {
@@ -59,7 +66,11 @@ pub fn extract_dict_strings_from_node_non_string_value_test() {
     "labels",
     fail_on_key_duplication: False,
   )
-  |> should.equal(Error("Expected labels entries to be string key-value pairs"))
+  |> should.equal(Error(LabelTypeMismatch(
+    label: "labels",
+    expected: ExpectedStringMap,
+    found: "map with non-string keys or values",
+  )))
 }
 
 pub fn extract_dict_strings_from_node_single_entry_test() {
@@ -83,7 +94,7 @@ pub fn extract_dict_strings_from_node_duplicate_key_fail_on_duplication_test() {
     "labels",
     fail_on_key_duplication: True,
   )
-  |> should.equal(Error("Duplicate keys detected for labels: key"))
+  |> should.equal(Error(DuplicateKeysDetected(label: "labels", keys: ["key"])))
 }
 
 pub fn extract_dict_strings_from_node_duplicate_key_do_not_fail_on_duplication_test() {
