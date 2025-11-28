@@ -1,18 +1,70 @@
-# glaml_extended
+# yay
 
-A fork of [glaml](https://github.com/katekyy/glaml) which is a simple Gleam wrapper around [yamerl](https://hex.pm/packages/yamerl) that enables your app to read YAML.
+**[Y]et [A]nother [Y]aml** is a Gleam YAML parser supporting both Erlang and JavaScript targets.
 
-## Changelog (deviation from glaml)
+> **Fork notice**: This is a fork of [glaml](https://github.com/katekyy/glaml) by [@katekyy](https://github.com/katekyy). The original glaml library provides the core YAML parsing functionality via [yamerl](https://hex.pm/packages/yamerl). This fork started by adding typed error handling, value extraction utilities, and JavaScript target support and continues to evolve.
 
-* **3.0.8** (11/25/25):
-  * Minimal watch tests script
-  * Replace string errors with typed errors for pattern-matchable, type-safe error handling with expected vs. found type info.
-* **3.0.7** (11/25/25): When no elements during terative collection parsing, surface "is empty" error.
-* **3.0.6** (11/25/25): Dictionary extraction will now fail on key duplication if (`fail_on_duplication: true`) passed in.
-* **3.0.5** (11/25/25): Extractors now differentiate between missing keys, empty values, and wrong types.
-* **3.0.4** (11/25/25): Include extraction helper methods to coalesce specific values to typed version.
-* **3.0.3** (11/25/25): JS bindings and surface duplicate keys.
+## Installation
 
-## Desired Further Changes
+```sh
+gleam add yay
+```
 
-* **Error types:** right now we do a bunch of matching on error message. This is error proned and a bad practice. Should be easy to expose some basic error types like "missing", "wrong type", etc.
+**JavaScript target:** If targeting JavaScript (Deno), you also need to install js-yaml:
+
+```sh
+deno add npm:js-yaml
+```
+
+## Usage
+
+```gleam
+import yay
+
+pub fn main() {
+  // Parse a YAML string
+  let assert Ok([doc]) = yay.parse_string("
+name: yay
+version: 1.0.0
+features:
+  - typed errors
+  - value extraction
+  - dual target support
+")
+
+  let root = yay.document_root(doc)
+
+  // Extract values with type safety
+  let assert Ok("yay") = yay.extract_string_from_node(root, "name")
+  let assert Ok(features) = yay.extract_string_list_from_node(root, "features")
+}
+```
+
+## Features
+
+- **Dual target support**: Works on both Erlang (via yamerl) and JavaScript (via js-yaml)
+- **Typed errors**: Pattern-matchable error types with expected vs. found type information
+- **Value extraction**: Helper functions to extract typed values from nodes (`extract_string_from_node`, `extract_int_from_node`, `extract_float_from_node`, `extract_bool_from_node`, `extract_string_list_from_node`, `extract_dict_strings_from_node`)
+- **Selector syntax**: Query nested values with dot notation (`"config.database.port"`) and array indices (`"items.#0"`)
+- **Duplicate key detection**: Optionally fail on duplicate dictionary keys
+
+## Error Handling
+
+All extraction functions return `Result(T, ExtractionError)` where `ExtractionError` is:
+
+```gleam
+pub type ExtractionError {
+  LabelMissing(label: String)
+  LabelValueEmpty(label: String)
+  LabelTypeMismatch(label: String, expected: ExpectedType, found: String)
+  DuplicateKeysDetected(label: String, keys: List(String))
+}
+```
+
+## Acknowledgments
+
+Thanks to [@katekyy](https://github.com/katekyy) for creating [glaml](https://github.com/katekyy/glaml), which this library is forked from.
+
+## License
+
+MIT

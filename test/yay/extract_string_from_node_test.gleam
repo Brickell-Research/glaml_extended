@@ -1,29 +1,27 @@
-import glaml_extended.{
-  ExpectedString, LabelMissing, LabelTypeMismatch, LabelValueEmpty,
-}
+import yay.{ExpectedString, LabelMissing, LabelTypeMismatch, LabelValueEmpty}
 import gleeunit/should
 
 // Helper function to parse YAML string to root node
-fn yaml_to_root(yaml_str: String) -> glaml_extended.Node {
-  let assert Ok([doc]) = glaml_extended.parse_string(yaml_str)
-  glaml_extended.document_root(doc)
+fn yaml_to_root(yaml_str: String) -> yay.Node {
+  let assert Ok([doc]) = yay.parse_string(yaml_str)
+  yay.document_root(doc)
 }
 
 pub fn extract_string_from_node_success_test() {
   let root = yaml_to_root("name: test_value")
-  glaml_extended.extract_string_from_node(root, "name")
+  yay.extract_string_from_node(root, "name")
   |> should.equal(Ok("test_value"))
 }
 
 pub fn extract_string_from_node_missing_key_test() {
   let root = yaml_to_root("name: test_value")
-  glaml_extended.extract_string_from_node(root, "missing")
+  yay.extract_string_from_node(root, "missing")
   |> should.equal(Error(LabelMissing(label: "missing")))
 }
 
 pub fn extract_string_from_node_wrong_type_test() {
   let root = yaml_to_root("name: 123")
-  glaml_extended.extract_string_from_node(root, "name")
+  yay.extract_string_from_node(root, "name")
   |> should.equal(
     Error(LabelTypeMismatch(
       label: "name",
@@ -35,18 +33,18 @@ pub fn extract_string_from_node_wrong_type_test() {
 
 pub fn extract_string_from_node_nested_test() {
   let root = yaml_to_root("outer:\n  inner: nested_value")
-  glaml_extended.extract_string_from_node(root, "outer.inner")
+  yay.extract_string_from_node(root, "outer.inner")
   |> should.equal(Ok("nested_value"))
 }
 
 pub fn extract_string_from_node_empty_test() {
   let root = yaml_to_root("outer: ")
-  glaml_extended.extract_string_from_node(root, "outer")
+  yay.extract_string_from_node(root, "outer")
   |> should.equal(Error(LabelValueEmpty(label: "outer")))
 }
 
 pub fn extract_string_from_node_nested_empty_test() {
   let root = yaml_to_root("outer:\n  inner: ")
-  glaml_extended.extract_string_from_node(root, "outer.inner")
+  yay.extract_string_from_node(root, "outer.inner")
   |> should.equal(Error(LabelValueEmpty(label: "outer.inner")))
 }

@@ -1,7 +1,7 @@
 import * as fs from "node:fs";
 import yaml from "js-yaml";
 import { Ok, Error as GleamError, toList } from "../gleam_stdlib/gleam.mjs";
-import * as glaml from "./glaml_extended.mjs";
+import * as yay from "./yay.mjs";
 
 // Parse YAML file and return list of documents
 export function parse_file(path) {
@@ -20,7 +20,7 @@ export function parse_file(path) {
       docs = yaml.loadAll(content, { json: false });
     }
     
-    const gleamDocs = docs.map(doc => new glaml.Document(jsToNode(doc)));
+    const gleamDocs = docs.map(doc => new yay.Document(jsToNode(doc)));
     return new Ok(toList(gleamDocs));
   } catch (e) {
     return new GleamError(mapJsError(e));
@@ -42,7 +42,7 @@ export function parse_string(content) {
       docs = yaml.loadAll(content, { json: false });
     }
     
-    const gleamDocs = docs.map(doc => new glaml.Document(jsToNode(doc)));
+    const gleamDocs = docs.map(doc => new yay.Document(jsToNode(doc)));
     return new Ok(toList(gleamDocs));
   } catch (e) {
     return new GleamError(mapJsError(e));
@@ -265,15 +265,15 @@ function mapJsError(e) {
   if (e && e.mark) {
     // YAML parsing error with location info
     const msg = e.message || "Parsing error";
-    const loc = new glaml.YamlErrorLoc(e.mark.line || 0, e.mark.column || 0);
-    return new glaml.ParsingError(msg, loc);
+    const loc = new yay.YamlErrorLoc(e.mark.line || 0, e.mark.column || 0);
+    return new yay.ParsingError(msg, loc);
   } else if (e && e.message) {
     // Error with message but no location
-    const loc = new glaml.YamlErrorLoc(0, 0);
-    return new glaml.ParsingError(e.message, loc);
+    const loc = new yay.YamlErrorLoc(0, 0);
+    return new yay.ParsingError(e.message, loc);
   } else {
     // Unexpected error
-    return new glaml.UnexpectedParsingError();
+    return new yay.UnexpectedParsingError();
   }
 }
 
@@ -285,26 +285,26 @@ function jsToNode(value) {
       jsToNode(k),
       jsToNode(v)
     ]);
-    return new glaml.NodeMap(toList(entries));
+    return new yay.NodeMap(toList(entries));
   }
   
   if (value === null || value === undefined) {
-    return new glaml.NodeNil();
+    return new yay.NodeNil();
   }
   if (typeof value === "string") {
-    return new glaml.NodeStr(value);
+    return new yay.NodeStr(value);
   }
   if (typeof value === "number") {
     if (Number.isInteger(value)) {
-      return new glaml.NodeInt(value);
+      return new yay.NodeInt(value);
     }
-    return new glaml.NodeFloat(value);
+    return new yay.NodeFloat(value);
   }
   if (typeof value === "boolean") {
-    return new glaml.NodeBool(value);
+    return new yay.NodeBool(value);
   }
   if (Array.isArray(value)) {
-    return new glaml.NodeSeq(toList(value.map(jsToNode)));
+    return new yay.NodeSeq(toList(value.map(jsToNode)));
   }
   if (typeof value === "object") {
     const entries = [];
@@ -313,7 +313,7 @@ function jsToNode(value) {
         entries.push([jsToNode(key), jsToNode(value[key])]);
       }
     }
-    return new glaml.NodeMap(toList(entries));
+    return new yay.NodeMap(toList(entries));
   }
-  return new glaml.NodeNil();
+  return new yay.NodeNil();
 }

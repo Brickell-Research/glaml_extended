@@ -1,17 +1,20 @@
-name = "glaml_extended"
-version = "3.0.8"
+name = "yay"
+version = "1.0.0"
 
 licences = ["MIT"]
 
-description = "A Gleam YAML parser supporting both Erlang and JavaScript targets based on a fork of glaml."
+description = "A Gleam YAML parser supporting both Erlang and JavaScript targets."
 
-repository = { type = "github", user = "Brickell-Research", repo = "glaml_extended" }
+repository = { type = "github", user = "Brickell-Research", repo = "yay" }
 links = []
 
 target = "erlang"
 
 [erlang]
 extra_applications = ["yamerl"]
+
+[javascript]
+runtime = "deno"
 
 [dependencies]
 gleam_stdlib = ">= 0.54.0 and < 2.0.0"
