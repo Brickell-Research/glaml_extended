@@ -6,7 +6,7 @@ import gleam/result
 import gleam/set
 import gleam/string
 
-/// A YAML document error containing a message — `msg` and it's location — `loc`.
+/// A YAML document error containing a message — `msg` and its location — `loc`.
 ///
 pub type YamlError {
   UnexpectedParsingError

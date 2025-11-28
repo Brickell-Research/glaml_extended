@@ -61,10 +61,6 @@ pub type ExtractionError {
 }
 ```
 
-## Contributing
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines on how to contribute.
-
 ## Acknowledgments
 
 Thanks to [@katekyy](https://github.com/katekyy) for creating [glaml](https://github.com/katekyy/glaml), which this library is forked from.
