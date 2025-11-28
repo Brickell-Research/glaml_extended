@@ -464,7 +464,11 @@ pub fn extract_dict_strings_from_node_nil_test() {
   let label = "labels"
 
   let root = yaml_to_root(label <> ": ")
-  yay.extract_dict_strings_from_node(root, label, fail_on_key_duplication: False)
+  yay.extract_dict_strings_from_node(
+    root,
+    label,
+    fail_on_key_duplication: False,
+  )
   |> should.equal(Error(KeyValueEmpty(key: label)))
 }
 
@@ -472,7 +476,11 @@ pub fn extract_dict_strings_from_node_empty_test() {
   let label = "labels"
 
   let root = yaml_to_root(label <> ": {}")
-  yay.extract_dict_strings_from_node(root, label, fail_on_key_duplication: False)
+  yay.extract_dict_strings_from_node(
+    root,
+    label,
+    fail_on_key_duplication: False,
+  )
   |> should.equal(Ok(dict.new()))
 }
 
@@ -492,7 +500,11 @@ pub fn extract_dict_strings_from_node_not_a_map_test() {
   let label = "labels"
 
   let root = yaml_to_root(label <> ": not_a_map")
-  yay.extract_dict_strings_from_node(root, label, fail_on_key_duplication: False)
+  yay.extract_dict_strings_from_node(
+    root,
+    label,
+    fail_on_key_duplication: False,
+  )
   |> should.equal(
     Error(KeyTypeMismatch(key: label, expected: ExpectedMap, found: "string")),
   )
@@ -502,7 +514,11 @@ pub fn extract_dict_strings_from_node_non_string_value_test() {
   let label = "labels"
 
   let root = yaml_to_root(label <> ":\n  count: 123")
-  yay.extract_dict_strings_from_node(root, label, fail_on_key_duplication: False)
+  yay.extract_dict_strings_from_node(
+    root,
+    label,
+    fail_on_key_duplication: False,
+  )
   |> should.equal(
     Error(KeyTypeMismatch(
       key: label,
@@ -524,6 +540,10 @@ pub fn extract_dict_strings_from_node_duplicate_key_do_not_fail_on_duplication_t
   let label = "labels"
 
   let root = yaml_to_root(label <> ":\n  key: value\n  key: other_value")
-  yay.extract_dict_strings_from_node(root, label, fail_on_key_duplication: False)
+  yay.extract_dict_strings_from_node(
+    root,
+    label,
+    fail_on_key_duplication: False,
+  )
   |> should.equal(Ok(dict.from_list([#("key", "other_value")])))
 }
