@@ -1,15 +1,13 @@
-import yay.{LabelMissing, LabelValueEmpty}
 import gleam/dict
 import gleeunit/should
-
-// Helper function to parse YAML string to root node
-fn yaml_to_root(yaml_str: String) -> yay.Node {
-  let assert Ok([doc]) = yay.parse_string(yaml_str)
-  yay.document_root(doc)
-}
+import test_helpers
+import yay.{LabelMissing, LabelValueEmpty}
 
 pub fn iteratively_parse_collection_success_test() {
-  let root = yaml_to_root("services:\n  - name: service1\n  - name: service2")
+  let root =
+    test_helpers.yaml_to_root(
+      "services:\n  - name: service1\n  - name: service2",
+    )
   let parse_service = fn(node, _params) {
     yay.extract_string_from_node(node, "name")
   }
@@ -18,7 +16,7 @@ pub fn iteratively_parse_collection_success_test() {
 }
 
 pub fn iteratively_parse_collection_missing_key_test() {
-  let root = yaml_to_root("services:\n  - name: service1")
+  let root = test_helpers.yaml_to_root("services:\n  - name: service1")
   let parse_service = fn(node, _params) {
     yay.extract_string_from_node(node, "name")
   }
@@ -27,7 +25,7 @@ pub fn iteratively_parse_collection_missing_key_test() {
 }
 
 pub fn iteratively_parse_collection_single_item_test() {
-  let root = yaml_to_root("services:\n  - name: only_service")
+  let root = test_helpers.yaml_to_root("services:\n  - name: only_service")
   let parse_service = fn(node, _params) {
     yay.extract_string_from_node(node, "name")
   }
@@ -36,7 +34,10 @@ pub fn iteratively_parse_collection_single_item_test() {
 }
 
 pub fn iteratively_parse_collection_parse_error_test() {
-  let root = yaml_to_root("services:\n  - name: service1\n  - other: no_name")
+  let root =
+    test_helpers.yaml_to_root(
+      "services:\n  - name: service1\n  - other: no_name",
+    )
   let parse_service = fn(node, _params) {
     yay.extract_string_from_node(node, "name")
   }
@@ -45,7 +46,10 @@ pub fn iteratively_parse_collection_parse_error_test() {
 }
 
 pub fn iteratively_parse_collection_with_params_test() {
-  let root = yaml_to_root("services:\n  - name: service1\n  - name: service2")
+  let root =
+    test_helpers.yaml_to_root(
+      "services:\n  - name: service1\n  - name: service2",
+    )
   let params = dict.from_list([#("prefix", "svc_")])
   let parse_service = fn(node, p) {
     let assert Ok(name) = yay.extract_string_from_node(node, "name")
@@ -57,7 +61,7 @@ pub fn iteratively_parse_collection_with_params_test() {
 }
 
 pub fn iteratively_parse_collection_with_no_content_test() {
-  let root = yaml_to_root("services:")
+  let root = test_helpers.yaml_to_root("services:")
   let params = dict.new()
   let parse_service = fn(node, p) {
     let assert Ok(name) = yay.extract_string_from_node(node, "name")

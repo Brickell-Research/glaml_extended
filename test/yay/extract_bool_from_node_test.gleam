@@ -1,44 +1,62 @@
-import yay.{ExpectedBool, LabelMissing, LabelTypeMismatch, LabelValueEmpty}
 import gleeunit/should
+import test_helpers
+import yay.{ExpectedBool, LabelMissing, LabelTypeMismatch, LabelValueEmpty}
 
-// Helper function to parse YAML string to root node
-fn yaml_to_root(yaml_str: String) -> yay.Node {
-  let assert Ok([doc]) = yay.parse_string(yaml_str)
-  yay.document_root(doc)
-}
+// ==== Tests ====
+// * ✅ can extract true & false
+// * ✅ surfaces missing error
+// * ✅ surfaces wrong type error
+// * ✅ surfaces empty error
 
+// Happy Path
 pub fn extract_bool_from_node_true_test() {
-  let root = yaml_to_root("enabled: true")
-  yay.extract_bool_from_node(root, "enabled")
-  |> should.equal(Ok(True))
-}
+  let label = "enabled"
 
-pub fn extract_bool_from_node_false_test() {
-  let root = yaml_to_root("enabled: false")
-  yay.extract_bool_from_node(root, "enabled")
+  // True test
+  yay.extract_bool_from_node(
+    test_helpers.yaml_to_root(label <> ": true"),
+    label,
+  )
+  |> should.equal(Ok(True))
+
+  // False test
+  yay.extract_bool_from_node(
+    test_helpers.yaml_to_root(label <> ": false"),
+    label,
+  )
   |> should.equal(Ok(False))
 }
 
+// Missing
 pub fn extract_bool_from_node_missing_key_test() {
-  let root = yaml_to_root("enabled: true")
-  yay.extract_bool_from_node(root, "missing")
-  |> should.equal(Error(LabelMissing(label: "missing")))
+  let label = "enabled"
+  let missing_label = "missing"
+
+  let root = test_helpers.yaml_to_root(label <> ": true")
+  yay.extract_bool_from_node(root, missing_label)
+  |> should.equal(Error(LabelMissing(label: missing_label)))
 }
 
+// Wrong Type
 pub fn extract_bool_from_node_wrong_type_test() {
-  let root = yaml_to_root("enabled: yes_please")
-  yay.extract_bool_from_node(root, "enabled")
+  let label = "enabled"
+
+  let root = test_helpers.yaml_to_root(label <> ": yes_please")
+  yay.extract_bool_from_node(root, label)
   |> should.equal(
     Error(LabelTypeMismatch(
-      label: "enabled",
+      label: label,
       expected: ExpectedBool,
       found: "string",
     )),
   )
 }
 
+// Empty
 pub fn extract_bool_from_node_empty_test() {
-  let root = yaml_to_root("enabled: ")
-  yay.extract_bool_from_node(root, "enabled")
-  |> should.equal(Error(LabelValueEmpty(label: "enabled")))
+  let label = "enabled"
+
+  let root = test_helpers.yaml_to_root(label <> ": ")
+  yay.extract_bool_from_node(root, label)
+  |> should.equal(Error(LabelValueEmpty(label: label)))
 }
