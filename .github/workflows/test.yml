@@ -35,6 +35,8 @@ jobs:
       
       - name: Test on ${{ matrix.target }}
         run: gleam test --target ${{ matrix.target }}
+        env:
+          DENO_PERMISSIONS: --allow-read
       
       - name: Check formatting
         if: matrix.target == 'erlang'  # Only check formatting once
