@@ -13,6 +13,8 @@ pub type YamlError {
   ParsingError(msg: String, loc: YamlErrorLoc)
 }
 
+/// The location of a YAML parsing error.
+///
 pub type YamlErrorLoc {
   YamlErrorLoc(line: Int, column: Int)
 }
@@ -79,6 +81,8 @@ pub type Selection {
   SelectSeq(index: Int)
 }
 
+/// An error that can occur when selecting a node.
+///
 pub type SelectorError {
   NodeNotFound(at: Int)
   SelectorParseError
@@ -171,7 +175,7 @@ fn list_at(l: List(a), index: Int) -> option.Option(a) {
   }
 }
 
-/// Parses `selector` as a `Selector` and
+/// Parses a selector string into a `Selector`.
 ///
 pub fn parse_selector(selector: String) -> Result(Selector, SelectorError) {
   use selections <- result.try(
@@ -215,6 +219,8 @@ pub type ExpectedType {
   ExpectedStringMap
 }
 
+/// An error that can occur when extracting a value from a node.
+///
 pub type ExtractionError {
   KeyMissing(key: String)
   KeyValueEmpty(key: String)
