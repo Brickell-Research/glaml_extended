@@ -1,4 +1,3 @@
-import * as fs from "node:fs";
 import yaml from "js-yaml";
 import { Ok, Error as GleamError, toList } from "../gleam_stdlib/gleam.mjs";
 import * as yay from "./yay.mjs";
@@ -6,7 +5,7 @@ import * as yay from "./yay.mjs";
 // Parse YAML file and return list of documents
 export function parse_file(path) {
   try {
-    const content = fs.readFileSync(path, "utf8");
+    const content = Deno.readTextFileSync(path);
     
     // Check if the file might have duplicate keys (simple heuristic)
     const hasDuplicateKeys = checkForDuplicateKeys(content);
