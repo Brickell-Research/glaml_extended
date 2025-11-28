@@ -15,8 +15,9 @@
 
 -type document() :: {document, RootNode :: document_node()}.
 
-% TODO
--type yaml_error() :: any().
+-type yaml_error() ::
+    unexpected_parsing_error
+    | {yaml_error, Message :: binary(), {Line :: integer(), Column :: integer()}}.
 
 % public
 -spec parse_file(Path :: iolist() | binary()) -> {ok, list(document())} | {error, yaml_error()}.
@@ -72,7 +73,7 @@ map_yamerl_doc(Document) ->
     {yamerl_doc, RootNode} = Document,
     {document, map_yamerl_node(RootNode)}.
 
-% TODO: Add function spec
+-spec map_yamerl_node(Node :: tuple()) -> document_node().
 map_yamerl_node(Node) ->
     case Node of
         {yamerl_null, _, _Tag, _Loc} ->
@@ -97,7 +98,7 @@ map_yamerl_node(Node) ->
             {node_map, map_yamerl_map(Pairs)}
     end.
 
-% TODO: Add function spec
+-spec map_yamerl_map(Pairs :: list({tuple(), tuple()})) -> list({document_node(), document_node()}).
 map_yamerl_map(Pairs) ->
     F = fun({Key, Value}) ->
         {map_yamerl_node(Key), map_yamerl_node(Value)}
