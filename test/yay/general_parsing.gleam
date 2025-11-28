@@ -1,6 +1,17 @@
 import gleeunit/should
 import yay
 
+// ==== Tests ====
+// * ✅ can parse multi-document string
+// * ✅ can parse multi-document file
+// * ✅ can select with selector
+// * ✅ can select with sugar syntax
+// * ✅ can parse unicode content
+// * ✅ surfaces node not found error
+// * ✅ surfaces selector parse error
+// * ✅ preserves duplicate keys
+
+// Parse String
 pub fn parse_string_test() {
   let assert Ok([a, b]) =
     yay.parse_string("x: 2048\ny: 4096\nz: 1024\n---\nx: 0\ny: 0\nz: 0")
@@ -28,6 +39,7 @@ pub fn parse_string_test() {
   )
 }
 
+// Parse File
 pub fn parse_file_test() {
   let assert Ok(docs) =
     yay.parse_file("./test/yay/artifacts/multi_document.yaml")
@@ -39,6 +51,7 @@ pub fn parse_file_test() {
   ])
 }
 
+// Selector
 pub fn selector_test() {
   let assert Ok([doc]) = yay.parse_file("./test/yay/artifacts/test.yaml")
 
@@ -49,6 +62,7 @@ pub fn selector_test() {
   |> should.equal(Ok(yay.NodeInt(7)))
 }
 
+// Sugar Syntax
 pub fn sugar_test() {
   let assert Ok([doc]) = yay.parse_file("./test/yay/artifacts/test.yaml")
 
@@ -56,6 +70,7 @@ pub fn sugar_test() {
   |> should.equal(Ok(yay.NodeStr("snow leopard")))
 }
 
+// Unicode
 pub fn unicode_test() {
   let assert Ok([doc]) =
     yay.parse_file("./test/yay/artifacts/unicode_test.yaml")
@@ -64,6 +79,7 @@ pub fn unicode_test() {
   |> should.equal(Ok(yay.NodeStr("健康サポート")))
 }
 
+// Error - Node Not Found & Selector Parse Error
 pub fn error_test() {
   let node = yay.NodeSeq([yay.NodeMap([#(yay.NodeStr("valid"), yay.NodeNil)])])
 
@@ -80,6 +96,7 @@ pub fn error_test() {
   |> should.equal(Error(yay.SelectorParseError))
 }
 
+// Duplicate Keys
 pub fn duplicate_key_test() {
   let assert Ok(docs) =
     yay.parse_file("./test/yay/artifacts/duplicate_keys.yaml")
