@@ -113,7 +113,7 @@ pub fn select_sugar(
 ///
 /// ```gleam
 /// let map = NodeMap([
-///   #(NodeStr("lib name"), NodeStr("glaml")),
+///   #(NodeStr("lib name"), NodeStr("yay")),
 ///   #(NodeStr("stars"), NodeInt(7)),
 /// ])
 ///
@@ -216,10 +216,10 @@ pub type ExpectedType {
 }
 
 pub type ExtractionError {
-  LabelMissing(label: String)
-  LabelValueEmpty(label: String)
-  LabelTypeMismatch(label: String, expected: ExpectedType, found: String)
-  DuplicateKeysDetected(label: String, keys: List(String))
+  KeyMissing(key: String)
+  KeyValueEmpty(key: String)
+  KeyTypeMismatch(key: String, expected: ExpectedType, found: String)
+  DuplicateKeysDetected(key: String, keys: List(String))
 }
 
 /// Converts a Node to a human-readable type name.
@@ -239,28 +239,28 @@ fn node_type_name(node: Node) -> String {
 // Extractors
 // ============================================================================
 
-/// Extracts a string from a glaml node.
+/// Extracts a string from a YAML node.
 pub fn extract_string_from_node(
   node: Node,
   key: String,
 ) -> Result(String, ExtractionError) {
   use query_template_node <- result.try(case select_sugar(node, key) {
     Ok(node) -> Ok(node)
-    Error(_) -> Error(LabelMissing(label: key))
+    Error(_) -> Error(KeyMissing(key: key))
   })
   case query_template_node {
     NodeStr(value) -> Ok(value)
-    NodeNil -> Error(LabelValueEmpty(label: key))
+    NodeNil -> Error(KeyValueEmpty(key: key))
     other ->
-      Error(LabelTypeMismatch(
-        label: key,
+      Error(KeyTypeMismatch(
+        key: key,
         expected: ExpectedString,
         found: node_type_name(other),
       ))
   }
 }
 
-/// Extracts a float from a glaml node.
+/// Extracts a float from a YAML node.
 /// Also accepts integers and converts them to floats (since YAML/JSON parsers
 /// often represent numbers like 99.0 as integers).
 pub fn extract_float_from_node(
@@ -269,64 +269,64 @@ pub fn extract_float_from_node(
 ) -> Result(Float, ExtractionError) {
   use query_template_node <- result.try(case select_sugar(node, key) {
     Ok(node) -> Ok(node)
-    Error(_) -> Error(LabelMissing(label: key))
+    Error(_) -> Error(KeyMissing(key: key))
   })
   case query_template_node {
     NodeFloat(value) -> Ok(value)
     NodeInt(value) -> Ok(int.to_float(value))
-    NodeNil -> Error(LabelValueEmpty(label: key))
+    NodeNil -> Error(KeyValueEmpty(key: key))
     other ->
-      Error(LabelTypeMismatch(
-        label: key,
+      Error(KeyTypeMismatch(
+        key: key,
         expected: ExpectedFloat,
         found: node_type_name(other),
       ))
   }
 }
 
-/// Extracts an integer from a glaml node.
+/// Extracts an integer from a YAML node.
 pub fn extract_int_from_node(
   node: Node,
   key: String,
 ) -> Result(Int, ExtractionError) {
   use query_template_node <- result.try(case select_sugar(node, key) {
     Ok(node) -> Ok(node)
-    Error(_) -> Error(LabelMissing(label: key))
+    Error(_) -> Error(KeyMissing(key: key))
   })
   case query_template_node {
     NodeInt(value) -> Ok(value)
-    NodeNil -> Error(LabelValueEmpty(label: key))
+    NodeNil -> Error(KeyValueEmpty(key: key))
     other ->
-      Error(LabelTypeMismatch(
-        label: key,
+      Error(KeyTypeMismatch(
+        key: key,
         expected: ExpectedInt,
         found: node_type_name(other),
       ))
   }
 }
 
-/// Extracts a boolean from a glaml node
+/// Extracts a boolean from a YAML node.
 pub fn extract_bool_from_node(
   node: Node,
   key: String,
 ) -> Result(Bool, ExtractionError) {
   use query_template_node <- result.try(case select_sugar(node, key) {
     Ok(node) -> Ok(node)
-    Error(_) -> Error(LabelMissing(label: key))
+    Error(_) -> Error(KeyMissing(key: key))
   })
   case query_template_node {
     NodeBool(value) -> Ok(value)
-    NodeNil -> Error(LabelValueEmpty(label: key))
+    NodeNil -> Error(KeyValueEmpty(key: key))
     other ->
-      Error(LabelTypeMismatch(
-        label: key,
+      Error(KeyTypeMismatch(
+        key: key,
         expected: ExpectedBool,
         found: node_type_name(other),
       ))
   }
 }
 
-/// Extracts a list of strings from a glaml node.
+/// Extracts a list of strings from a YAML node.
 /// Returns Ok([]) if the key exists but has an empty/nil value.
 /// Returns Error if the key is missing or has wrong type.
 pub fn extract_string_list_from_node(
@@ -335,7 +335,7 @@ pub fn extract_string_list_from_node(
 ) -> Result(List(String), ExtractionError) {
   use list_node <- result.try(case select_sugar(node, key) {
     Ok(node) -> Ok(node)
-    Error(_) -> Error(LabelMissing(label: key))
+    Error(_) -> Error(KeyMissing(key: key))
   })
   case list_node {
     // Empty/nil value - return empty list
@@ -346,8 +346,8 @@ pub fn extract_string_list_from_node(
         Ok(_) ->
           do_extract_string_list(list_node, 0)
           |> result.map_error(fn(_) {
-            LabelTypeMismatch(
-              label: key,
+            KeyTypeMismatch(
+              key: key,
               expected: ExpectedStringList,
               found: "list with non-string items",
             )
@@ -358,8 +358,8 @@ pub fn extract_string_list_from_node(
     }
     // Wrong type - not a list
     other ->
-      Error(LabelTypeMismatch(
-        label: key,
+      Error(KeyTypeMismatch(
+        key: key,
         expected: ExpectedList,
         found: node_type_name(other),
       ))
@@ -386,11 +386,11 @@ fn validate_no_duplicate_keys(
   case dupes_list, fail_on_key_duplication {
     [], _ -> Ok(items)
     _, False -> Ok(items)
-    _, True -> Error(DuplicateKeysDetected(label: key, keys: dupes_list))
+    _, True -> Error(DuplicateKeysDetected(key: key, keys: dupes_list))
   }
 }
 
-/// Extracts a dictionary of string key-value pairs from a glaml node.
+/// Extracts a dictionary of string key-value pairs from a YAML node.
 /// Returns Ok(empty dict) if the key exists but has an empty/nil value.
 /// Returns Error if the key is missing or has wrong type.
 pub fn extract_dict_strings_from_node(
@@ -410,8 +410,8 @@ pub fn extract_dict_strings_from_node(
             case entry {
               #(NodeStr(dict_key), NodeStr(value)) -> Ok(#(dict_key, value))
               _ ->
-                Error(LabelTypeMismatch(
-                  label: key,
+                Error(KeyTypeMismatch(
+                  key: key,
                   expected: ExpectedStringMap,
                   found: "map with non-string keys or values",
                 ))
@@ -422,70 +422,19 @@ pub fn extract_dict_strings_from_node(
         }
         // Wrong type - not a map
         other ->
-          Error(LabelTypeMismatch(
-            label: key,
+          Error(KeyTypeMismatch(
+            key: key,
             expected: ExpectedMap,
             found: node_type_name(other),
           ))
       }
     }
     // Key doesn't exist
-    Error(_) -> Error(LabelMissing(label: key))
+    Error(_) -> Error(KeyMissing(key: key))
   }
 }
 
-/// Iteratively parses a collection of nodes.
-pub fn iteratively_parse_collection(
-  root: Node,
-  params: dict.Dict(String, String),
-  actual_parse_fn: fn(Node, dict.Dict(String, String)) ->
-    Result(a, ExtractionError),
-  key: String,
-) -> Result(List(a), ExtractionError) {
-  use services_node <- result.try(
-    select_sugar(root, key)
-    |> result.map_error(fn(_) { LabelMissing(label: key) }),
-  )
-  do_parse_collection(services_node, 0, params, actual_parse_fn, key)
-}
-
-/// Internal parser for list of nodes, iterates over the list.
-fn do_parse_collection(
-  services: Node,
-  index: Int,
-  params: dict.Dict(String, String),
-  actual_parse_fn: fn(Node, dict.Dict(String, String)) ->
-    Result(a, ExtractionError),
-  key: String,
-) -> Result(List(a), ExtractionError) {
-  case select_sugar(services, "#" <> int.to_string(index)) {
-    Ok(service_node) -> {
-      use service <- result.try(actual_parse_fn(service_node, params))
-      use rest <- result.try(do_parse_collection(
-        services,
-        index + 1,
-        params,
-        actual_parse_fn,
-        key,
-      ))
-      Ok([service, ..rest])
-    }
-    Error(error) -> {
-      case error, index {
-        NodeNotFound(_), 0 -> Error(LabelValueEmpty(label: key))
-        NodeNotFound(_), _ -> Ok([])
-        SelectorParseError, _ ->
-          Error(LabelTypeMismatch(
-            label: key,
-            expected: ExpectedList,
-            found: "unparsable selector",
-          ))
-      }
-    }
-  }
-}
-
-/// Internal helper for extracting string lists from glaml nodes.
+/// Internal helper for extracting string lists from YAML nodes.
 fn do_extract_string_list(
   list_node: Node,
   index: Int,

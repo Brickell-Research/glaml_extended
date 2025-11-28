@@ -54,10 +54,10 @@ All extraction functions return `Result(T, ExtractionError)` where `ExtractionEr
 
 ```gleam
 pub type ExtractionError {
-  LabelMissing(label: String)
-  LabelValueEmpty(label: String)
-  LabelTypeMismatch(label: String, expected: ExpectedType, found: String)
-  DuplicateKeysDetected(label: String, keys: List(String))
+  KeyMissing(key: String)
+  KeyValueEmpty(key: String)
+  KeyTypeMismatch(key: String, expected: ExpectedType, found: String)
+  DuplicateKeysDetected(key: String, keys: List(String))
 }
 ```
 
