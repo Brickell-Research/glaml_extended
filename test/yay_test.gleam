@@ -120,6 +120,25 @@ pub fn error_test() {
   |> should.equal(Error(yay.SelectorParseError))
 }
 
+// Nil vs Empty Collections - verify parser distinguishes them
+pub fn nil_vs_empty_collections_test() {
+  let root = yaml_to_root("nil_list:\nempty_list: []\nnil_map:\nempty_map: {}")
+
+  // nil values should be NodeNil
+  yay.select_sugar(root, "nil_list")
+  |> should.equal(Ok(yay.NodeNil))
+
+  yay.select_sugar(root, "nil_map")
+  |> should.equal(Ok(yay.NodeNil))
+
+  // empty collections should be empty NodeSeq/NodeMap
+  yay.select_sugar(root, "empty_list")
+  |> should.equal(Ok(yay.NodeSeq([])))
+
+  yay.select_sugar(root, "empty_map")
+  |> should.equal(Ok(yay.NodeMap([])))
+}
+
 // Duplicate Keys
 pub fn duplicate_key_test() {
   let assert Ok(docs) =
@@ -440,11 +459,19 @@ pub fn extract_string_list_from_node_single_item_test() {
   |> should.equal(Ok(["only_one"]))
 }
 
-// Empty List
-pub fn extract_string_list_from_node_empty_test() {
+// Nil Value - returns error
+pub fn extract_string_list_from_node_nil_test() {
   let label = "items"
 
   yay.extract_string_list_from_node(yaml_to_root(label <> ": "), label)
+  |> should.equal(Error(KeyValueEmpty(key: label)))
+}
+
+// Empty List - explicit [] returns Ok([])
+pub fn extract_string_list_from_node_empty_test() {
+  let label = "items"
+
+  yay.extract_string_list_from_node(yaml_to_root(label <> ": []"), label)
   |> should.equal(Ok([]))
 }
 
@@ -532,11 +559,20 @@ pub fn extract_dict_strings_from_node_single_entry_test() {
   |> should.equal(Ok("value"))
 }
 
-// Empty
-pub fn extract_dict_strings_from_node_empty_test() {
+// Nil Value - returns error
+pub fn extract_dict_strings_from_node_nil_test() {
   let label = "labels"
 
   let root = yaml_to_root(label <> ": ")
+  yay.extract_dict_strings_from_node(root, label, fail_on_key_duplication: False)
+  |> should.equal(Error(KeyValueEmpty(key: label)))
+}
+
+// Empty Dict - explicit {} returns Ok(dict.new())
+pub fn extract_dict_strings_from_node_empty_test() {
+  let label = "labels"
+
+  let root = yaml_to_root(label <> ": {}")
   yay.extract_dict_strings_from_node(root, label, fail_on_key_duplication: False)
   |> should.equal(Ok(dict.new()))
 }

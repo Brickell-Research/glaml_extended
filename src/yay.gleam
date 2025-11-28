@@ -327,8 +327,9 @@ pub fn extract_bool_from_node(
 }
 
 /// Extracts a list of strings from a YAML node.
-/// Returns Ok([]) if the key exists but has an empty/nil value.
-/// Returns Error if the key is missing or has wrong type.
+/// Returns Ok([]) for an explicitly empty list (`[]`).
+/// Returns Error(KeyValueEmpty) for nil/null values.
+/// Returns Error(KeyMissing) if the key doesn't exist.
 pub fn extract_string_list_from_node(
   node: Node,
   key: String,
@@ -338,8 +339,8 @@ pub fn extract_string_list_from_node(
     Error(_) -> Error(KeyMissing(key: key))
   })
   case list_node {
-    // Empty/nil value - return empty list
-    NodeNil -> Ok([])
+    // Nil value - error
+    NodeNil -> Error(KeyValueEmpty(key: key))
     // Sequence - extract strings from it
     NodeSeq(_) -> {
       case select_sugar(list_node, "#0") {
@@ -391,8 +392,9 @@ fn validate_no_duplicate_keys(
 }
 
 /// Extracts a dictionary of string key-value pairs from a YAML node.
-/// Returns Ok(empty dict) if the key exists but has an empty/nil value.
-/// Returns Error if the key is missing or has wrong type.
+/// Returns Ok(empty dict) for an explicitly empty map (`{}`).
+/// Returns Error(KeyValueEmpty) for nil/null values.
+/// Returns Error(KeyMissing) if the key doesn't exist.
 pub fn extract_dict_strings_from_node(
   node: Node,
   key: String,
@@ -401,8 +403,8 @@ pub fn extract_dict_strings_from_node(
   case select_sugar(node, key) {
     Ok(dict_node) -> {
       case dict_node {
-        // Empty/nil value - return empty dict
-        NodeNil -> Ok(dict.new())
+        // Nil value - error
+        NodeNil -> Error(KeyValueEmpty(key: key))
         // Map - extract string key-value pairs
         NodeMap(entries) -> {
           entries
