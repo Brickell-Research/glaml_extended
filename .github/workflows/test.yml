@@ -26,6 +26,10 @@ jobs:
         with:
           deno-version: v2.x
 
+      - name: Install npm dependencies
+        if: matrix.target == 'javascript'
+        run: deno install
+
       - name: Prepare
         run: gleam deps download
       
