@@ -21,17 +21,13 @@ jobs:
           gleam-version: "latest"
           rebar3-version: "latest"
       
-      - uses: actions/setup-node@v4
+      - uses: denoland/setup-deno@v2
         if: matrix.target == 'javascript'
         with:
-          node-version: "20"
-      
+          deno-version: v2.x
+
       - name: Prepare
-        run: |
-          gleam deps download
-          if [ "${{ matrix.target }}" = "javascript" ]; then
-            npm install
-          fi
+        run: gleam deps download
       
       - name: Test on ${{ matrix.target }}
         run: gleam test --target ${{ matrix.target }}
