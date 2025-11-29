@@ -219,6 +219,20 @@ pub type ExpectedType {
   ExpectedStringMap
 }
 
+/// Converts an ExpectedType to its string representation for error messages.
+fn expected_type_to_string(expected: ExpectedType) -> String {
+  case expected {
+    ExpectedString -> "string"
+    ExpectedInt -> "int"
+    ExpectedFloat -> "float"
+    ExpectedBool -> "bool"
+    ExpectedList -> "list"
+    ExpectedMap -> "map"
+    ExpectedStringList -> "list of strings"
+    ExpectedStringMap -> "map of strings"
+  }
+}
+
 /// An error that can occur when extracting a value from a node.
 ///
 pub type ExtractionError {
@@ -226,6 +240,25 @@ pub type ExtractionError {
   KeyValueEmpty(key: String)
   KeyTypeMismatch(key: String, expected: ExpectedType, found: String)
   DuplicateKeysDetected(key: String, keys: List(String))
+}
+
+/// Converts an ExtractionError to a human-readable string.
+pub fn extraction_error_to_string(error: ExtractionError) -> String {
+  case error {
+    KeyMissing(key) -> "Missing " <> key
+    KeyValueEmpty(key) -> "Expected " <> key <> " to be non-empty"
+    KeyTypeMismatch(key, expected, found) -> {
+      let expected_str = expected_type_to_string(expected)
+      "Expected "
+      <> key
+      <> " to be a "
+      <> expected_str
+      <> ", but found "
+      <> found
+    }
+    DuplicateKeysDetected(key, keys) ->
+      "Duplicate keys detected for " <> key <> ": " <> string.join(keys, ", ")
+  }
 }
 
 /// Converts a Node to a human-readable type name.
