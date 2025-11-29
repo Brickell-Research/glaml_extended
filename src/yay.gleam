@@ -481,12 +481,12 @@ pub fn extract_optional_dict_strings(
   node: Node,
   key: String,
   fail_on_key_duplication fail_on_key_duplication: Bool,
-) -> Result(dict.Dict(String, String), String) {
+) -> Result(dict.Dict(String, String), ExtractionError) {
   case extract_dict_strings_from_node(node, key, fail_on_key_duplication) {
     Ok(d) -> Ok(d)
     Error(KeyMissing(_)) -> Ok(dict.new())
     Error(KeyValueEmpty(_)) -> Ok(dict.new())
-    Error(other) -> Error(extraction_error_to_string(other))
+    Error(other) -> Error(other)
   }
 }
 

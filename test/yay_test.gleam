@@ -601,7 +601,9 @@ pub fn extract_optional_dict_strings_not_a_map_returns_error_test() {
 
   let root = yaml_to_root(label <> ": not_a_map")
   yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: False)
-  |> should.equal(Error("Expected labels to be a map, but found string"))
+  |> should.equal(
+    Error(KeyTypeMismatch(key: label, expected: ExpectedMap, found: "string")),
+  )
 }
 
 pub fn extract_optional_dict_strings_non_string_value_returns_error_test() {
@@ -609,9 +611,13 @@ pub fn extract_optional_dict_strings_non_string_value_returns_error_test() {
 
   let root = yaml_to_root(label <> ":\n  count: 123")
   yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: False)
-  |> should.equal(Error(
-    "Expected labels to be a map of strings, but found map with non-string keys or values",
-  ))
+  |> should.equal(
+    Error(KeyTypeMismatch(
+      key: label,
+      expected: ExpectedStringMap,
+      found: "map with non-string keys or values",
+    )),
+  )
 }
 
 pub fn extract_optional_dict_strings_duplicate_key_fail_on_duplication_test() {
@@ -619,5 +625,5 @@ pub fn extract_optional_dict_strings_duplicate_key_fail_on_duplication_test() {
 
   let root = yaml_to_root(label <> ":\n  key: value\n  key: other_value")
   yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: True)
-  |> should.equal(Error("Duplicate keys detected for labels: key"))
+  |> should.equal(Error(DuplicateKeysDetected(key: label, keys: ["key"])))
 }
