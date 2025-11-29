@@ -547,3 +547,77 @@ pub fn extract_dict_strings_from_node_duplicate_key_do_not_fail_on_duplication_t
   )
   |> should.equal(Ok(dict.from_list([#("key", "other_value")])))
 }
+
+// ============================================================================
+// extract_optional_dict_strings
+// ============================================================================
+
+pub fn extract_optional_dict_strings_success_test() {
+  let label = "labels"
+
+  let root = yaml_to_root(label <> ":\n  env: production\n  team: platform")
+  let assert Ok(result) =
+    yay.extract_optional_dict_strings(
+      root,
+      label,
+      fail_on_key_duplication: False,
+    )
+  dict.get(result, "env")
+  |> should.equal(Ok("production"))
+  dict.get(result, "team")
+  |> should.equal(Ok("platform"))
+}
+
+pub fn extract_optional_dict_strings_missing_returns_empty_dict_test() {
+  let missing_label = "missing"
+
+  let root = yaml_to_root("other: value")
+  yay.extract_optional_dict_strings(
+    root,
+    missing_label,
+    fail_on_key_duplication: False,
+  )
+  |> should.equal(Ok(dict.new()))
+}
+
+pub fn extract_optional_dict_strings_nil_returns_empty_dict_test() {
+  let label = "labels"
+
+  let root = yaml_to_root(label <> ": ")
+  yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: False)
+  |> should.equal(Ok(dict.new()))
+}
+
+pub fn extract_optional_dict_strings_empty_returns_empty_dict_test() {
+  let label = "labels"
+
+  let root = yaml_to_root(label <> ": {}")
+  yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: False)
+  |> should.equal(Ok(dict.new()))
+}
+
+pub fn extract_optional_dict_strings_not_a_map_returns_error_test() {
+  let label = "labels"
+
+  let root = yaml_to_root(label <> ": not_a_map")
+  yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: False)
+  |> should.equal(Error("Expected labels to be a map, but found string"))
+}
+
+pub fn extract_optional_dict_strings_non_string_value_returns_error_test() {
+  let label = "labels"
+
+  let root = yaml_to_root(label <> ":\n  count: 123")
+  yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: False)
+  |> should.equal(Error(
+    "Expected labels to be a map of strings, but found map with non-string keys or values",
+  ))
+}
+
+pub fn extract_optional_dict_strings_duplicate_key_fail_on_duplication_test() {
+  let label = "labels"
+
+  let root = yaml_to_root(label <> ":\n  key: value\n  key: other_value")
+  yay.extract_optional_dict_strings(root, label, fail_on_key_duplication: True)
+  |> should.equal(Error("Duplicate keys detected for labels: key"))
+}

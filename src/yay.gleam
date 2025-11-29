@@ -475,6 +475,21 @@ pub fn extract_dict_strings_from_node(
   }
 }
 
+/// Extracts an optional dictionary of string key-value pairs from a YAML node.
+/// Returns Ok(empty dict) if the key doesn't exist or has a nil/empty value.
+pub fn extract_optional_dict_strings(
+  node: Node,
+  key: String,
+  fail_on_key_duplication fail_on_key_duplication: Bool,
+) -> Result(dict.Dict(String, String), String) {
+  case extract_dict_strings_from_node(node, key, fail_on_key_duplication) {
+    Ok(d) -> Ok(d)
+    Error(KeyMissing(_)) -> Ok(dict.new())
+    Error(KeyValueEmpty(_)) -> Ok(dict.new())
+    Error(other) -> Error(extraction_error_to_string(other))
+  }
+}
+
 /// Internal helper for extracting string lists from YAML nodes.
 fn do_extract_string_list(
   list_node: Node,
