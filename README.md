@@ -1,6 +1,6 @@
 # yay
 
-[![unit_tests](https://github.com/Brickell-Research/yay/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/Brickell-Research/yay/actions/workflows/test.yml)
+[![unit_tests](https://github.com/Brickell-Research/yay/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/Brickell-Research/yay/actions/workflows/unit_tests.yml)
 [![Hex.pm](https://img.shields.io/hexpm/v/yay)](https://hex.pm/packages/yay)
 [![Docs](https://img.shields.io/badge/docs-hexdocs-blue)](https://hexdocs.pm/yay/index.html)
 
