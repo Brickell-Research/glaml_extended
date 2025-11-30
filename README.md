@@ -1,5 +1,9 @@
 # yay
 
+[![unit_tests](https://github.com/Brickell-Research/yay/actions/workflows/unit_tests.yml/badge.svg)](https://github.com/Brickell-Research/yay/actions/workflows/test.yml)
+[![Hex.pm](https://img.shields.io/hexpm/v/yay)](https://hex.pm/packages/yay)
+[![Docs](https://img.shields.io/badge/docs-hexdocs-blue)](https://hexdocs.pm/yay/index.html)
+
 **[Y]et [A]nother [Y]aml** is a Gleam YAML parser supporting both Erlang and JavaScript targets.
 
 > **Fork notice**: This is a fork of [glaml](https://github.com/katekyy/glaml) by [@katekyy](https://github.com/katekyy). The original glaml library provides the core YAML parsing functionality via [yamerl](https://hex.pm/packages/yamerl). This fork started by adding typed error handling, value extraction utilities, and JavaScript target support and continues to evolve.
@@ -35,8 +39,8 @@ features:
   let root = yay.document_root(doc)
 
   // Extract values with type safety
-  let assert Ok("yay") = yay.extract_string_from_node(root, "name")
-  let assert Ok(features) = yay.extract_string_list_from_node(root, "features")
+  let assert Ok("yay") = yay.extract_string(root, "name")
+  let assert Ok(features) = yay.extract_string_list(root, "features")
 }
 ```
 
@@ -44,7 +48,7 @@ features:
 
 - **Dual target support**: Works on both Erlang (via yamerl) and JavaScript (via js-yaml)
 - **Typed errors**: Pattern-matchable error types with expected vs. found type information
-- **Value extraction**: Helper functions to extract typed values from nodes (`extract_string_from_node`, `extract_int_from_node`, `extract_float_from_node`, `extract_bool_from_node`, `extract_string_list_from_node`, `extract_dict_strings_from_node`)
+- **Value extraction**: Helper functions to extract typed values from nodes (`extract_string`, `extract_int`, `extract_float`, `extract_bool`, `extract_string_list`, `extract_string_map`)
 - **Selector syntax**: Query nested values with dot notation (`"config.database.port"`) and array indices (`"items.#0"`)
 - **Duplicate key detection**: Optionally fail on duplicate dictionary keys
 
@@ -54,9 +58,9 @@ All extraction functions return `Result(T, ExtractionError)` where `ExtractionEr
 
 ```gleam
 pub type ExtractionError {
-  KeyMissing(key: String)
+  KeyMissing(key: String, failed_at_segment: Int)
   KeyValueEmpty(key: String)
-  KeyTypeMismatch(key: String, expected: ExpectedType, found: String)
+  KeyTypeMismatch(key: String, expected: String, found: String)
   DuplicateKeysDetected(key: String, keys: List(String))
 }
 ```
