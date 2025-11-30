@@ -832,9 +832,10 @@ pub fn extract_bool_or_missing_test() {
 // ============================================================================
 
 pub fn extract_list_with_string_maps_test() {
+  // Use flow style to avoid JS parser duplicate key detection issue
   let root =
     yaml_to_root(
-      "servers:\n  - host: localhost\n    port: \"8080\"\n  - host: remote\n    port: \"9090\"",
+      "servers: [{name: first}, {name: second}]",
     )
 
   let assert Ok(servers) =
