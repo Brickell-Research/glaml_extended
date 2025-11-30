@@ -833,10 +833,7 @@ pub fn extract_bool_or_missing_test() {
 
 pub fn extract_list_with_string_maps_test() {
   // Use flow style to avoid JS parser duplicate key detection issue
-  let root =
-    yaml_to_root(
-      "servers: [{name: first}, {name: second}]",
-    )
+  let root = yaml_to_root("servers: [{name: first}, {name: second}]")
 
   let assert Ok(servers) =
     yay.extract_list_with(root, "servers", fn(item) {
