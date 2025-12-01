@@ -914,7 +914,7 @@ fn validate_no_duplicate_keys(
           }
         })
 
-      let dupes_list = set.to_list(duplicates)
+      let dupes_list = set.to_list(duplicates) |> list.sort(string.compare)
       case dupes_list {
         [] -> Ok(items)
         _ -> Error(DuplicateKeysDetected(key: key, keys: dupes_list))
