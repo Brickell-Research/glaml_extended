@@ -187,49 +187,104 @@ function parseMap(lines, startIdx, parentIndent) {
 function parseSequence(lines, startIdx, parentIndent) {
   const items = [];
   let i = startIdx;
-  
+
   while (i < lines.length) {
     const line = lines[i];
-    
+
     if (!line.trim() || line.trim().startsWith('#')) {
       i++;
       continue;
     }
-    
+
     const indent = line.length - line.trimStart().length;
-    
+
     // If less indented, we're done with this sequence
     if (parentIndent >= 0 && indent < parentIndent) {
       break;
     }
-    
+
     const trimmed = line.trim();
-    
+
     // If it's not a sequence item, we're done
     if (!trimmed.startsWith('- ')) {
       break;
     }
-    
+
     const itemStr = trimmed.substring(2).trim();
-    
+    // Calculate the indent level for content after "- "
+    const dashIdx = line.indexOf('-');
+    const contentIndent = dashIdx + 2; // Position after "- "
+
     if (itemStr === '') {
-      // Nested item
+      // Nested item on next line
       const nextResult = parseValue(lines, i + 1, indent);
       items.push(nextResult.value);
       i = nextResult.nextIdx;
     } else if (itemStr.includes(':')) {
-      // Inline map in sequence
-      const mapLines = [itemStr];
-      const mapResult = parseMap(mapLines, 0, -1);
-      items.push(mapResult.value);
-      i++;
+      // Inline map in sequence - need to also parse continuation lines
+      const colonIdx = itemStr.indexOf(':');
+      const key = itemStr.substring(0, colonIdx).trim();
+      const valueStr = itemStr.substring(colonIdx + 1).trim();
+
+      const pairs = [];
+      let value;
+
+      if (valueStr === '') {
+        // Value is on next line(s)
+        const nextResult = parseValue(lines, i + 1, contentIndent);
+        value = nextResult.value;
+        i = nextResult.nextIdx;
+      } else {
+        value = parseScalar(valueStr);
+        i++;
+      }
+      pairs.push([key, value]);
+
+      // Continue parsing additional keys at the same or greater indentation
+      while (i < lines.length) {
+        const nextLine = lines[i];
+        if (!nextLine.trim() || nextLine.trim().startsWith('#')) {
+          i++;
+          continue;
+        }
+
+        const nextIndent = nextLine.length - nextLine.trimStart().length;
+        const nextTrimmed = nextLine.trim();
+
+        // Stop if we hit a less indented line or another sequence item at same level
+        if (nextIndent < contentIndent || (nextIndent === indent && nextTrimmed.startsWith('- '))) {
+          break;
+        }
+
+        // Must be a key-value pair
+        if (!nextTrimmed.includes(':') || nextTrimmed.startsWith('- ')) {
+          break;
+        }
+
+        const nextColonIdx = nextTrimmed.indexOf(':');
+        const nextKey = nextTrimmed.substring(0, nextColonIdx).trim();
+        const nextValueStr = nextTrimmed.substring(nextColonIdx + 1).trim();
+
+        let nextValue;
+        if (nextValueStr === '') {
+          const nextResult = parseValue(lines, i + 1, nextIndent);
+          nextValue = nextResult.value;
+          i = nextResult.nextIdx;
+        } else {
+          nextValue = parseScalar(nextValueStr);
+          i++;
+        }
+        pairs.push([nextKey, nextValue]);
+      }
+
+      items.push({ __pairs: pairs });
     } else {
       // Scalar item
       items.push(parseScalar(itemStr));
       i++;
     }
   }
-  
+
   return {
     value: items,
     nextIdx: i
